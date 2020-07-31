@@ -42,6 +42,18 @@ impl State {
         self.temps.insert(id.to_string(), value);
     }
 
+    pub fn is_output(&self, id: &str) -> bool {
+        self.outputs.contains_key(id)
+    }
+
+    pub fn add(&mut self, id: &str, value: i32) {
+        if self.is_output(id) {
+            self.add_output(id, value);
+        } else {
+            self.add_temp(id, value);
+        }
+    }
+
     pub fn get(&self, id: &str) -> i32 {
         if let Some(input) = self.inputs.get(id) {
             *input
