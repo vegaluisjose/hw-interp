@@ -1,25 +1,22 @@
 use std::collections::HashMap;
 
-type Inputs = HashMap<String, i32>;
-type Outputs = HashMap<String, i32>;
-type Regs = HashMap<String, i32>;
-type Temps = HashMap<String, i32>;
+type StateMap = HashMap<String, i32>;
 
 #[derive(Clone, Debug)]
 pub struct State {
-    inputs: Inputs,
-    outputs: Outputs,
-    regs: Regs,
-    temps: Temps,
+    inputs: StateMap,
+    outputs: StateMap,
+    regs: StateMap,
+    temps: StateMap,
 }
 
 impl Default for State {
     fn default() -> State {
         State {
-            inputs: Inputs::new(),
-            outputs: Outputs::new(),
-            regs: Regs::new(),
-            temps: Temps::new(),
+            inputs: StateMap::new(),
+            outputs: StateMap::new(),
+            regs: StateMap::new(),
+            temps: StateMap::new(),
         }
     }
 }
@@ -49,27 +46,27 @@ impl State {
         self.regs.contains_key(id)
     }
 
-    pub fn inputs(&self) -> &Inputs {
+    pub fn inputs(&self) -> &StateMap {
         &self.inputs
     }
 
-    pub fn outputs(&self) -> &Outputs {
+    pub fn outputs(&self) -> &StateMap {
         &self.outputs
     }
 
-    pub fn regs(&self) -> &Regs {
+    pub fn regs(&self) -> &StateMap {
         &self.regs
     }
 
-    pub fn set_inputs(&mut self, inputs: &Inputs) {
+    pub fn set_inputs(&mut self, inputs: &StateMap) {
         self.inputs = inputs.clone();
     }
 
-    pub fn set_outputs(&mut self, outputs: &Outputs) {
+    pub fn set_outputs(&mut self, outputs: &StateMap) {
         self.outputs = outputs.clone();
     }
 
-    pub fn set_regs(&mut self, regs: &Regs) {
+    pub fn set_regs(&mut self, regs: &StateMap) {
         self.regs = regs.clone();
     }
 
@@ -90,7 +87,7 @@ pub trait ToString {
     fn to_string(&self) -> String;
 }
 
-impl ToString for HashMap<String, i32> {
+impl ToString for StateMap {
     fn to_string(&self) -> String {
         let mut fmt = String::new();
         for (id, val) in self.iter() {
