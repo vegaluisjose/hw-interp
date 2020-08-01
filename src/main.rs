@@ -1,6 +1,26 @@
 use std::rc::Rc;
 use std::collections::HashMap;
 
+type Id = String;
+
+#[derive(Clone, Debug)]
+pub enum Expr {
+    Lit(i32),
+    Ref(Id),
+    Add(Rc<Expr>, Rc<Expr>),
+}
+
+#[derive(Clone, Debug)]
+pub struct Stmt {
+    pub id: Id,
+    pub expr: Expr,
+}
+
+#[derive(Clone, Debug)]
+pub struct Prog {
+    pub body: Vec<Stmt>,
+}
+
 type Inputs = HashMap<String, i32>;
 type Outputs = HashMap<String, i32>;
 type Regs = HashMap<String, i32>;
@@ -46,15 +66,35 @@ impl State {
         self.outputs.contains_key(id)
     }
 
-    pub fn add(&mut self, id: &str, value: i32) {
-        if self.is_output(id) {
-            self.add_output(id, value);
-        } else {
-            self.add_temp(id, value);
-        }
+    pub fn is_reg(&self, id: &str) -> bool {
+        self.regs.contains_key(id)
     }
 
-    pub fn get(&self, id: &str) -> i32 {
+    pub fn inputs(&self) -> &Inputs {
+        &self.inputs
+    }
+
+    pub fn outputs(&self) -> &Outputs {
+        &self.outputs
+    }
+
+    pub fn regs(&self) -> &Regs {
+        &self.regs
+    }
+
+    pub fn set_inputs(&mut self, inputs: &Inputs) {
+        self.inputs = inputs.clone();
+    }
+
+    pub fn set_outputs(&mut self, outputs: &Outputs) {
+        self.outputs = outputs.clone();
+    }
+
+    pub fn set_regs(&mut self, regs: &Regs) {
+        self.regs = regs.clone();
+    }
+
+    pub fn get_value(&self, id: &str) -> i32 {
         if let Some(input) = self.inputs.get(id) {
             *input
         } else if let Some(reg) = self.regs.get(id) {
@@ -67,24 +107,28 @@ impl State {
     }
 }
 
-type Id = String;
-
-#[derive(Clone, Debug)]
-pub enum Expr {
-    Lit(i32),
-    Ref(Id),
-    Add(Rc<Expr>, Rc<Expr>),
+fn eval_expr(expr: &Expr, state: &State) -> i32 {
+    match expr {
+        Expr::Lit(num) => *num,
+        Expr::Ref(var) => state.get_value(var),
+        Expr::Add(lhs, rhs) => eval_expr(lhs, state) + eval_expr(rhs, state),
+    }
 }
 
-#[derive(Clone, Debug)]
-pub struct Stmt {
-    pub id: Id,
-    pub expr: Expr,
-}
-
-#[derive(Clone, Debug)]
-pub struct Prog {
-    pub body: Vec<Stmt>,
+fn eval_prog(prog: &Prog, state: &State) -> State {
+    let mut state_in = state.clone();
+    let mut state_out = State::default();
+    for stmt in prog.body.iter() {
+        let val = eval_expr(&stmt.expr, &state_in);
+        if state_in.is_output(&stmt.id) {
+            state_out.add_output(&stmt.id, val);
+        } else if state_in.is_reg(&stmt.id) {
+            state_out.add_reg(&stmt.id, val);
+        } else {
+            state_in.add_temp(&stmt.id, val);
+        }
+    }
+    state_out
 }
 
 fn add_two_inputs() -> Prog {
@@ -97,7 +141,17 @@ fn add_two_inputs() -> Prog {
 
 fn main() {
     let prog = add_two_inputs();
-    for stmt in prog.body.iter() {
-        println!("{:?}", stmt);
+    let mut state = State::default();
+    state.add_input("a", 3);
+    state.add_input("b", 4);
+    state.add_output("y", 0);
+    let next = eval_prog(&prog, &state);
+    state.set_outputs(next.outputs());
+    state.set_regs(next.regs());
+    for (id, val) in state.inputs().iter() {
+        println!("[in] {}:{}", id, val);
+    }
+    for (id, val) in state.outputs().iter() {
+        println!("[out] {}:{}", id, val);
     }
 }
