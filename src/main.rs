@@ -1,30 +1,7 @@
 use hw_interp::ast::*;
+use hw_interp::eval::eval_prog;
 use hw_interp::state::{State, ToString};
 use std::rc::Rc;
-
-fn eval_expr(expr: &Expr, state: &State) -> i32 {
-    match expr {
-        Expr::Lit(num) => *num,
-        Expr::Ref(var) => state.get_value(var),
-        Expr::Add(lhs, rhs) => eval_expr(lhs, state) + eval_expr(rhs, state),
-    }
-}
-
-fn eval_prog(prog: &Prog, state: &State) -> State {
-    let mut state_in = state.clone();
-    let mut state_out = State::default();
-    for stmt in prog.body.iter() {
-        let val = eval_expr(&stmt.expr, &state_in);
-        if state_in.is_output(&stmt.id) {
-            state_out.add_output(&stmt.id, val);
-        } else if state_in.is_reg(&stmt.id) {
-            state_out.add_reg(&stmt.id, val);
-        } else {
-            state_in.add_temp(&stmt.id, val);
-        }
-    }
-    state_out
-}
 
 fn prog_add() -> Prog {
     let a = Expr::Ref("a".to_string());
