@@ -139,19 +139,35 @@ fn add_two_inputs() -> Prog {
     Prog { body: vec![stmt] }
 }
 
+pub trait ToString {
+    fn to_string(&self) -> String;
+}
+
+impl ToString for HashMap<String, i32> {
+    fn to_string(&self) -> String {
+        let mut fmt = String::new();
+        for (id, val) in self.iter() {
+            fmt.push_str(&format!(" {}:{}", id, val));
+        }
+        fmt
+    }
+}
+
+fn interp(prog: &Prog, cycles: u32) {
+    let mut state = State::default();
+    for i in 0..cycles {
+        state.add_input("a", 3);
+        state.add_input("b", 4);
+        state.add_output("y", 0);
+        let next = eval_prog(&prog, &state);
+        state.set_outputs(next.outputs());
+        state.set_regs(next.regs());
+        println!("cycle:{} i:{}", i, state.inputs().to_string());
+        println!("cycle:{} o:{}", i, state.outputs().to_string());
+    }
+}
+
 fn main() {
     let prog = add_two_inputs();
-    let mut state = State::default();
-    state.add_input("a", 3);
-    state.add_input("b", 4);
-    state.add_output("y", 0);
-    let next = eval_prog(&prog, &state);
-    state.set_outputs(next.outputs());
-    state.set_regs(next.regs());
-    for (id, val) in state.inputs().iter() {
-        println!("[in] {}:{}", id, val);
-    }
-    for (id, val) in state.outputs().iter() {
-        println!("[out] {}:{}", id, val);
-    }
+    interp(&prog, 10);
 }
