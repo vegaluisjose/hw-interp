@@ -22,11 +22,15 @@ pub fn interp(prog: &Prog, trace: &Trace) {
         state.add_reg(id, 0);
     }
     for i in 0..cycles {
+        // add inputs for this cycle
         for id in prog.inputs.iter() {
             state.add_input(&id, trace.deq(&id));
         }
+        // print inputs
         println!("[in] cycle:{} {:?}", i, state.inputs());
+        // eval
         let next = eval_prog(&prog, &state);
+        // print outputs
         for id in prog.outputs.iter() {
             if state.is_reg(id) {
                 assert!(trace.deq(&id) == state.get_value(&id));

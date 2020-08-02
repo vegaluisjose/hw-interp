@@ -10,12 +10,12 @@ fn eval_expr(expr: &Expr, state: &State) -> i32 {
     }
 }
 
-fn params_avail(expr: &Expr, state: &State) -> bool {
+fn is_ready(expr: &Expr, state: &State) -> bool {
     match expr {
         Expr::Lit(_) => true,
         Expr::Ref(var) => state.contains_value(var),
-        Expr::Add(lhs, rhs) => params_avail(lhs, state) && params_avail(rhs, state),
-        Expr::Reg(var) => params_avail(var, state),
+        Expr::Add(lhs, rhs) => is_ready(lhs, state) && is_ready(rhs, state),
+        Expr::Reg(var) => is_ready(var, state),
     }
 }
 
@@ -23,8 +23,9 @@ pub fn eval_prog(prog: &Prog, state: &State) -> State {
     let mut state_in = state.clone();
     let mut state_out = State::default();
     let mut unresolved: Vec<Stmt> = Vec::new();
+    // initial eval, push unresolved instr for later
     for stmt in prog.body.iter() {
-        if params_avail(&stmt.expr, &state_in) {
+        if is_ready(&stmt.expr, &state_in) {
             let val = eval_expr(&stmt.expr, &state_in);
             if state_in.is_reg(&stmt.id) {
                 state_out.add_reg(&stmt.id, val);
@@ -36,8 +37,9 @@ pub fn eval_prog(prog: &Prog, state: &State) -> State {
             unresolved.push(stmt.clone());
         }
     }
+    // eval unresolved instr, it should succeed
     for stmt in unresolved.iter() {
-        if params_avail(&stmt.expr, &state_in) {
+        if is_ready(&stmt.expr, &state_in) {
             let val = eval_expr(&stmt.expr, &state_in);
             if state_in.is_reg(&stmt.id) {
                 state_out.add_reg(&stmt.id, val);
