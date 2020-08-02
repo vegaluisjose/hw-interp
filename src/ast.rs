@@ -17,5 +17,7 @@ pub struct Stmt {
 
 #[derive(Clone, Debug)]
 pub struct Prog {
+    pub inputs: Vec<Id>,
+    pub outputs: Vec<Id>,
     pub body: Vec<Stmt>,
 }

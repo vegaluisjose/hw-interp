@@ -1,14 +1,20 @@
-use crate::ast::Prog;
+use crate::ast::{Prog, Expr};
 use crate::eval::eval_prog;
 use crate::state::{State, ToString};
+use crate::trace::Trace;
 
-pub fn interp(prog: &Prog, cycles: u32) {
+pub fn interp(prog: &Prog, trace: &Trace) {
+    let mut trace = trace.clone();
+    assert!(trace.is_valid(), "Error: invalid trace");
+    let cycles = trace.cycles();
     let mut state = State::default();
-    // init regs and outputs with zero
-    state.add_output("y", 0);
+    for id in prog.outputs.iter() {
+        state.add_output(id, 0);
+    }
     for i in 0..cycles {
-        state.add_input("a", 3);
-        state.add_input("b", 4);
+        for id in prog.inputs.iter() {
+            state.add_input(&id, trace.pop_value(&id));
+        }
         let next = eval_prog(&prog, &state);
         state.set_outputs(next.outputs());
         state.set_regs(next.regs());

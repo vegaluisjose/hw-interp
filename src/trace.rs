@@ -21,7 +21,7 @@ impl Trace {
         if let Some(data) = self.map.get_mut(id) {
             data.push(value);
         } else {
-            self.map.insert(id.to_string(), Vec::new());
+            self.map.insert(id.to_string(), vec![value]);
         }
     }
 
