@@ -63,4 +63,8 @@ impl State {
             panic!("Error: {} id not found", id)
         }
     }
+
+    pub fn contains_value(&self, id: &str) -> bool {
+        self.inputs.get(id).is_some() || self.regs.get(id).is_some() || self.temps.get(id).is_some()
+    }
 }
