@@ -1,14 +1,13 @@
-use crate::ast::{Prog, Expr};
+use crate::ast::{Expr, Prog};
 use crate::eval::eval_prog;
-use crate::state::{State, ToString};
+use crate::state::State;
 use crate::trace::Trace;
 
 fn get_reg_ids(prog: &Prog) -> Vec<String> {
     let mut ids: Vec<String> = Vec::new();
     for stmt in prog.body.iter() {
-        match stmt.expr {
-            Expr::Reg(_) => ids.push(stmt.id.to_string()),
-            _ => (),
+        if let Expr::Reg(_) = stmt.expr {
+            ids.push(stmt.id.to_string())
         }
     }
     ids
@@ -22,17 +21,19 @@ pub fn interp(prog: &Prog, trace: &Trace) {
     for id in get_reg_ids(prog).iter() {
         state.add_reg(id, 0);
     }
-    for id in prog.outputs.iter() {
-        state.add_output(id, 0);
-    }
     for i in 0..cycles {
         for id in prog.inputs.iter() {
             state.add_input(&id, trace.deq(&id));
         }
+        println!("[in] cycle:{} {:?}", i, state.inputs());
         let next = eval_prog(&prog, &state);
-        state.set_outputs(next.outputs());
+        for id in prog.outputs.iter() {
+            if state.is_reg(id) {
+                println!("[out] cycle:{} {}:{}", i, &id, state.get_value(&id))
+            } else {
+                println!("[out] cycle:{} {}:{}", i, &id, next.get_value(&id))
+            }
+        }
         state.set_regs(next.regs());
-        println!("cycle:{} i:{}", i, state.inputs().to_string());
-        println!("cycle:{} o:{}", i, state.outputs().to_string());
     }
 }
