@@ -29,8 +29,10 @@ pub fn interp(prog: &Prog, trace: &Trace) {
         let next = eval_prog(&prog, &state);
         for id in prog.outputs.iter() {
             if state.is_reg(id) {
+                assert!(trace.deq(&id) == state.get_value(&id));
                 println!("[out] cycle:{} {}:{}", i, &id, state.get_value(&id))
             } else {
+                assert!(trace.deq(&id) == next.get_value(&id));
                 println!("[out] cycle:{} {}:{}", i, &id, next.get_value(&id))
             }
         }

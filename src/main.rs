@@ -3,7 +3,7 @@ use hw_interp::interp;
 use hw_interp::trace::Trace;
 use std::rc::Rc;
 
-fn prog() -> Prog {
+fn prog_add() -> Prog {
     let a = Expr::Ref("a".to_string());
     let b = Expr::Ref("b".to_string());
     let x = Expr::Ref("x".to_string());
@@ -22,7 +22,7 @@ fn prog() -> Prog {
     }
 }
 
-fn build_trace() -> Trace {
+fn trace_add() -> Trace {
     let mut trace = Trace::default();
     trace.enq("a", 3);
     trace.enq("b", 4);
@@ -36,8 +36,12 @@ fn build_trace() -> Trace {
     trace
 }
 
-fn main() {
-    let prog = prog();
-    let trace = build_trace();
+fn test_add() {
+    let prog = prog_add();
+    let trace = trace_add();
     interp(&prog, &trace);
+}
+
+fn main() {
+    test_add();
 }
