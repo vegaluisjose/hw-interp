@@ -1,6 +1,7 @@
 use std::collections::HashMap;
+use std::collections::VecDeque;
 
-type TraceData = Vec<i32>;
+type TraceData = VecDeque<i32>;
 type TraceMap = HashMap<String, TraceData>;
 
 #[derive(Clone, Debug)]
@@ -17,17 +18,19 @@ impl Default for Trace {
 }
 
 impl Trace {
-    pub fn push_value(&mut self, id: &str, value: i32) {
+    pub fn enq(&mut self, id: &str, value: i32) {
         if let Some(data) = self.map.get_mut(id) {
-            data.push(value);
+            data.push_front(value);
         } else {
-            self.map.insert(id.to_string(), vec![value]);
+            let mut data = VecDeque::new();
+            data.push_front(value);
+            self.map.insert(id.to_string(), data);
         }
     }
 
-    pub fn pop_value(&mut self, id: &str) -> i32 {
+    pub fn deq(&mut self, id: &str) -> i32 {
         if let Some(data) = self.map.get_mut(id) {
-            if let Some(value) = data.pop() {
+            if let Some(value) = data.pop_back() {
                 value
             } else {
                 panic!("Error: id {} has empty queue", id);

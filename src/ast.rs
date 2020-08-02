@@ -7,6 +7,7 @@ pub enum Expr {
     Lit(i32),
     Ref(Id),
     Add(Rc<Expr>, Rc<Expr>),
+    Reg(Rc<Expr>),
 }
 
 #[derive(Clone, Debug)]
