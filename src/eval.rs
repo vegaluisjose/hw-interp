@@ -30,6 +30,7 @@ pub fn eval_prog(prog: &Prog, state: &State) -> State {
                 state_out.add_reg(&stmt.id, val);
             } else {
                 state_in.add_temp(&stmt.id, val);
+                state_out.add_temp(&stmt.id, val);
             }
         } else {
             unresolved.push(stmt.clone());
@@ -42,6 +43,7 @@ pub fn eval_prog(prog: &Prog, state: &State) -> State {
                 state_out.add_reg(&stmt.id, val);
             } else {
                 state_in.add_temp(&stmt.id, val);
+                state_out.add_temp(&stmt.id, val);
             }
         } else {
             panic!("Error: program contains cycles, malformed");

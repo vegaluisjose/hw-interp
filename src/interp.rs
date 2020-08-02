@@ -36,6 +36,7 @@ pub fn interp(prog: &Prog, trace: &Trace) {
                 println!("[out] cycle:{} {}:{}", i, &id, next.get_value(&id))
             }
         }
+        // commit new register values
         state.set_regs(next.regs());
     }
 }
