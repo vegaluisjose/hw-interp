@@ -13,7 +13,7 @@ fn eval_expr(expr: &Expr, state: &State) -> i32 {
 fn is_ready(expr: &Expr, state: &State) -> bool {
     match expr {
         Expr::Lit(_) => true,
-        Expr::Ref(var) => state.contains_value(var),
+        Expr::Ref(var) => state.contains_id(var),
         Expr::Add(lhs, rhs) => is_ready(lhs, state) && is_ready(rhs, state),
         Expr::Reg(var) => is_ready(var, state),
     }

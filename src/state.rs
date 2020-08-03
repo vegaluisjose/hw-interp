@@ -64,7 +64,7 @@ impl State {
         }
     }
 
-    pub fn contains_value(&self, id: &str) -> bool {
+    pub fn contains_id(&self, id: &str) -> bool {
         self.inputs.get(id).is_some() || self.regs.get(id).is_some() || self.temps.get(id).is_some()
     }
 }
